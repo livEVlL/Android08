@@ -12,6 +12,9 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class GameView extends View {
     private Resources res; //抓專案的資源
     private int viewW, viewH;
@@ -19,7 +22,8 @@ public class GameView extends View {
     private Bitmap bmpBall;
     private Context context;
     private Matrix matrix;
-    private float ballW, ballH;
+    private float ballW, ballH,ballX,ballY,dx,dy;
+    Timer timer;
 
 
     public GameView(Context context, AttributeSet attrs) {
@@ -28,6 +32,8 @@ public class GameView extends View {
         res = context.getResources();
         //setBackgroundColor(Color.GREEN);
         matrix = new Matrix();
+        timer = new Timer();
+
 
 
     }
@@ -36,13 +42,31 @@ public class GameView extends View {
         viewW = getWidth(); viewH = getHeight();
         Log.v("brad", viewW + "x" +viewH);
 
-        bmpBall = BitmapFactory.decodeResource(res,R.drawable.p2);
+        bmpBall = BitmapFactory.decodeResource(res,R.drawable.p3);
         ballW = viewW / 12f; ballH = ballW;
         bmpBall = resizeBmp(bmpBall, ballW, ballH);
 
+        dx = dy =10;
+
+        timer.schedule(new BallTask(),1000,60);
 
         isInit = true;
     }
+
+    private class BallTask extends TimerTask {
+        @Override
+        public void run() {
+            if (ballX<0 || ballX + ballW > viewW){
+                dx *= -1;
+            }
+            if (ballY <0 || ballY+ballH>viewH){
+                dy *= -1;
+            }
+            ballX += dx; ballY += dy;
+            postInvalidate();
+        }
+    }
+
 
     Bitmap resizeBmp(Bitmap src, float width, float height){
         matrix.reset();
@@ -56,6 +80,6 @@ public class GameView extends View {
         super.onDraw(canvas);
         if (!isInit) init();
 
-        canvas.drawBitmap(bmpBall,0,0,null);
+        canvas.drawBitmap(bmpBall,ballX,ballY,null);
     }
 }
